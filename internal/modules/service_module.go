@@ -9,5 +9,6 @@ import (
 var ServiceModule = fx.Options(
 	fx.Provide(
 		services.NewUserService,
+		services.NewGenreService,
 	),
 )

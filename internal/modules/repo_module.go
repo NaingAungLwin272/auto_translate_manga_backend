@@ -9,5 +9,6 @@ import (
 var RepoModule = fx.Options(
 	fx.Provide(
 		repositories.NewUserRepo,
+		repositories.NewGenreRepo,
 	),
 )

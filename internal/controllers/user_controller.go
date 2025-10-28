@@ -38,6 +38,7 @@ func (c *UserController) CreateUser(ctx *gin.Context) {
 	}
 
 	ctx.JSON(201, utils.SuccessResponse[dtos.UserResponseDTO]{
+		Status:  201,
 		Message: "user created successfully",
 		Data:    resp,
 	})
@@ -60,6 +61,7 @@ func (c *UserController) GetAllUsers(ctx *gin.Context) {
 	}
 
 	ctx.JSON(200, utils.SuccessResponse[[]dtos.UserResponseDTO]{
+		Status:  200,
 		Message: "users fetched successfully",
 		Data:    resp,
 	})

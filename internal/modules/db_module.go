@@ -45,6 +45,8 @@ func NewMongoClient(cfg *configs.Config, lc fx.Lifecycle) (*mongo.Client, error)
 		},
 	})
 
+	SetupIndexes(client.Database(cfg.DBName))
+
 	return client, nil
 }
 

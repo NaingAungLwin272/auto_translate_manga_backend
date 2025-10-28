@@ -5,6 +5,7 @@ import (
 	"auto_translate_manga_backend/internal/models"
 	"context"
 	"encoding/json"
+	"fmt"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/v2/bson"
@@ -24,6 +25,9 @@ func NewUserRepo(client *mongo.Client, cfg *configs.Config) *UserRepo {
 func (r *UserRepo) CreateUser(ctx context.Context, user *models.User) (*models.User, error) {
 	res, err := r.coll.InsertOne(ctx, user)
 	if err != nil {
+		if mongo.IsDuplicateKeyError(err) {
+			return nil, fmt.Errorf("email '%s' already exists", user.Email)
+		}
 		return nil, err
 	}
 

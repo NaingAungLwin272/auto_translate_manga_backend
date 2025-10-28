@@ -9,5 +9,6 @@ import (
 var ControllerModule = fx.Options(
 	fx.Provide(
 		controllers.NewUserController,
+		controllers.NewGenreController,
 	),
 )
