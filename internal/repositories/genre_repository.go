@@ -7,6 +7,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
@@ -24,6 +25,9 @@ func NewGenreRepo(client *mongo.Client, cfg *configs.Config) *GenreRepo {
 }
 
 func (genreRepo *GenreRepo) CreateGenre(ctx context.Context, genre *models.Genre) (*models.Genre, error) {
+	genre.CreatedAt = time.Now()
+	genre.UpdatedAt = time.Now()
+
 	result, err := genreRepo.coll.InsertOne(ctx, genre)
 	if err != nil {
 		if mongo.IsDuplicateKeyError(err) {

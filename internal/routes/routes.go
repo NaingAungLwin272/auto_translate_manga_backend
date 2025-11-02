@@ -11,6 +11,8 @@ func SetupRoutes(
 	r *gin.Engine,
 	userController *controllers.UserController,
 	genreController *controllers.GenreController,
+	mangaController *controllers.MangaController,
+	cloudinaryController *controllers.CloudinaryController,
 ) {
 	// Global middlewares
 	r.Use(middlewares.CORSMiddleware())
@@ -31,5 +33,20 @@ func SetupRoutes(
 		genres.GET("/get_genre_by_id/:id", genreController.GetGenreById)
 		genres.PATCH("/update_genre_by_id/:id", genreController.UpdateGenreById)
 		genres.DELETE("/delete_genre_by_id/:id", genreController.DeleteGenreById)
+	}
+
+	// Manga routes
+	mangas := r.Group("/mangas")
+	{
+		mangas.POST("/create_manga", mangaController.CreateManga)
+		mangas.GET("/get_all_manga", mangaController.GetAllManga)
+		mangas.GET("/get_manga_by_id/:id", mangaController.GetMangaById)
+		mangas.GET("/filter_manga", mangaController.FilterManga)
+	}
+
+	// Cloudinary cover_image upload for manga
+	cover_image := r.Group("/file_upload")
+	{
+		cover_image.POST("/cover_image_upload", cloudinaryController.UploadCoverImageToCloudinary)
 	}
 }

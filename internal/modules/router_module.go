@@ -11,9 +11,11 @@ import (
 func NewRouter(
 	userController *controllers.UserController,
 	genreController *controllers.GenreController,
+	mangaController *controllers.MangaController,
+	cloudinaryController *controllers.CloudinaryController,
 ) *gin.Engine {
 	r := gin.Default()
-	routes.SetupRoutes(r, userController, genreController)
+	routes.SetupRoutes(r, userController, genreController, mangaController, cloudinaryController)
 	return r
 }
 

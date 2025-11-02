@@ -32,5 +32,18 @@ func SetupIndexes(db *mongo.Database) {
 		log.Fatal("Failed to create index for genres:", err)
 	}
 
+	// mangas collection
+	_, err = db.Collection("mangas").Indexes().CreateOne(context.TODO(), mongo.IndexModel{
+		Keys: bson.D{{Key: "title", Value: 1}},
+		Options: options.Index().SetUnique(true).
+			SetCollation(&options.Collation{
+				Locale:   "en",
+				Strength: 2,
+			}),
+	})
+	if err != nil {
+		log.Fatal("Failed to create index for genres:", err)
+	}
+
 	log.Println("✅ All indexes created successfully")
 }
