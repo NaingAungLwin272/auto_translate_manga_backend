@@ -170,3 +170,21 @@ func (mangaRepo *MangaRepo) FilterManga(ctx context.Context, name string, genre 
 
 	return &result, nil
 }
+
+func (mangaRepo *MangaRepo) DeleteManga(ctx context.Context, id string) (string, error) {
+	objectID, err := bson.ObjectIDFromHex(id)
+	if err != nil {
+		return "", fmt.Errorf("invalid id: %s", id)
+	}
+
+	res, err := mangaRepo.coll.DeleteOne(ctx, bson.M{"_id": objectID})
+	if err != nil {
+		return "", fmt.Errorf("failed to delete manga: %v", err)
+	}
+
+	if res.DeletedCount == 0 {
+		return "", fmt.Errorf("manga not found")
+	}
+
+	return "manga deleted successfully", nil
+}

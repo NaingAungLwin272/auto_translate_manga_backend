@@ -212,5 +212,4 @@ func (genreController *GenreController) DeleteGenreById(ctx *gin.Context) {
 		Status:  http.StatusOK,
 		Message: "genre deleted successfully",
 	})
-
 }

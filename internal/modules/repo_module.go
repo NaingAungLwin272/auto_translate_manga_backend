@@ -11,5 +11,6 @@ var RepoModule = fx.Options(
 		repositories.NewUserRepo,
 		repositories.NewGenreRepo,
 		repositories.NewMangaRepo,
+		repositories.NewFavoriteRepo,
 	),
 )

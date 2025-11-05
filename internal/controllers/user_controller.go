@@ -5,6 +5,7 @@ import (
 	"auto_translate_manga_backend/internal/services"
 	"auto_translate_manga_backend/internal/utils"
 	"context"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -47,7 +48,11 @@ func (c *UserController) CreateUser(ctx *gin.Context) {
 func (c *UserController) GetAllUsers(ctx *gin.Context) {
 	users, err := c.service.GetAllUsers(context.Background())
 	if err != nil {
-		ctx.JSON(500, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, utils.ErrorResponse{
+			Status:  http.StatusInternalServerError,
+			Error:   http.StatusText(http.StatusInternalServerError),
+			Message: "internal server error",
+		})
 		return
 	}
 

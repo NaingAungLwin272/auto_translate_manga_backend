@@ -43,3 +43,7 @@ func (mangaService *MangaService) GetMangaById(ctx context.Context, id string) (
 func (mangaService *MangaService) FilterManga(ctx context.Context, title string, genres []string, status string) (*[]models.MangaWithGenres, error) {
 	return mangaService.repo.FilterManga(ctx, title, genres, status)
 }
+
+func (mangaService *MangaService) DeleteManga(ctx context.Context, id string) (string, error) {
+	return mangaService.repo.DeleteManga(ctx, id)
+}

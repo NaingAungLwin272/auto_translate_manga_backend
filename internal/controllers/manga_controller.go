@@ -41,7 +41,7 @@ func (mangaController *MangaController) CreateManga(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, utils.ErrorResponse{
 			Status:  http.StatusInternalServerError,
 			Error:   http.StatusText(http.StatusInternalServerError),
-			Message: "internal server error",
+			Message: err.Error(),
 		})
 		return
 	}
@@ -180,5 +180,40 @@ func (mangaController *MangaController) FilterManga(ctx *gin.Context) {
 		Status:  http.StatusOK,
 		Message: "mangas found successfully",
 		Data:    mangaResponse,
+	})
+}
+
+func (mangaController *MangaController) DeleteManga(ctx *gin.Context) {
+	var id = ctx.Params.ByName("id")
+	if id == "" {
+		ctx.JSON(http.StatusBadRequest, utils.ErrorResponse{
+			Status:  http.StatusBadRequest,
+			Error:   http.StatusText(http.StatusBadRequest),
+			Message: "id parameter is required",
+		})
+		return
+	}
+
+	_, err := mangaController.service.DeleteManga(context.Background(), id)
+	if err != nil {
+		if err.Error() == "manga not found" {
+			ctx.JSON(http.StatusNotFound, utils.ErrorResponse{
+				Status:  http.StatusNotFound,
+				Error:   http.StatusText(http.StatusNotFound),
+				Message: "manga not found",
+			})
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, utils.ErrorResponse{
+			Status:  http.StatusInternalServerError,
+			Error:   http.StatusText(http.StatusInternalServerError),
+			Message: err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, utils.SuccessResponseForDeletingProcess[any]{
+		Status:  http.StatusOK,
+		Message: "manga deleted successfully",
 	})
 }

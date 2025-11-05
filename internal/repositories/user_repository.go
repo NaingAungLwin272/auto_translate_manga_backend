@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
@@ -31,7 +30,7 @@ func (r *UserRepo) CreateUser(ctx context.Context, user *models.User) (*models.U
 		return nil, err
 	}
 
-	var oid primitive.ObjectID
+	var oid bson.ObjectID
 	b, _ := json.Marshal(res.InsertedID)
 	if err := json.Unmarshal(b, &oid); err != nil {
 		return nil, err

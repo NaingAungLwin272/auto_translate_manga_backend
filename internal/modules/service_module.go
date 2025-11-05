@@ -14,5 +14,6 @@ var ServiceModule = fx.Options(
 		services.NewGenreService,
 		services.NewCloudinaryService,
 		services.NewMangaService,
+		services.NewFavoriteService,
 	),
 )
