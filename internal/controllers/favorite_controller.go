@@ -98,3 +98,51 @@ func (favoriteController *FavoriteController) GetFavoriteMangaByUserId(ctx *gin.
 		Data:    favoriteManga,
 	})
 }
+
+func (favoriteController *FavoriteController) RemoveFavoriteMangaByUserId(ctx *gin.Context) {
+	userId := ctx.Params.ByName("id")
+	mangaId := ctx.Query("manga_id")
+
+	if userId == "" {
+		ctx.JSON(http.StatusBadRequest, utils.ErrorResponse{
+			Status:  http.StatusBadRequest,
+			Error:   http.StatusText(http.StatusBadRequest),
+			Message: "id parameter is required",
+		})
+		return
+	}
+
+	if mangaId == "" {
+		ctx.JSON(http.StatusBadRequest, utils.ErrorResponse{
+			Status:  http.StatusBadRequest,
+			Error:   http.StatusText(http.StatusBadRequest),
+			Message: "manga query parameter is required",
+		})
+		return
+	}
+
+	mangas := strings.Split(mangaId, ",")
+	result, err := favoriteController.service.RemoveFavoriteMangaByUserId(ctx, userId, mangas)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, utils.ErrorResponse{
+			Status:  http.StatusInternalServerError,
+			Error:   http.StatusText(http.StatusInternalServerError),
+			Message: err.Error(),
+		})
+		return
+	}
+
+	if strings.Contains(result, "remove unsuccessfully") {
+		ctx.JSON(http.StatusInternalServerError, utils.ErrorResponse{
+			Status:  http.StatusInternalServerError,
+			Error:   http.StatusText(http.StatusInternalServerError),
+			Message: "favorite remove unsuccessfully",
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, utils.SuccessResponseForDeletingProcess[any]{
+		Status:  http.StatusOK,
+		Message: "favorite removed successfully",
+	})
+}

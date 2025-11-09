@@ -26,3 +26,7 @@ func (favoriteService *FavoriteService) CreateFavoriteManga(ctx context.Context,
 func (favoriteService *FavoriteService) GetFavoriteMangaByUserId(ctx context.Context, id string) (*models.FavoriteWithUsersMangaDetail, error) {
 	return favoriteService.repo.GetAllFavoriteMangaByUserId(ctx, id)
 }
+
+func (favoriteService *FavoriteService) RemoveFavoriteMangaByUserId(ctx context.Context, userId string, mangaId []string) (string, error) {
+	return favoriteService.repo.RemoveFavoriteMangaByUserId(ctx, userId, mangaId)
+}

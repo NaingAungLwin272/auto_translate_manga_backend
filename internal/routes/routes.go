@@ -13,6 +13,7 @@ func SetupRoutes(
 	genreController *controllers.GenreController,
 	mangaController *controllers.MangaController,
 	favoriteController *controllers.FavoriteController,
+	chapterController *controllers.ChapterController,
 	cloudinaryController *controllers.CloudinaryController,
 ) {
 	// Global middlewares
@@ -52,6 +53,12 @@ func SetupRoutes(
 	{
 		favorites.POST("/create_favorite_manga", favoriteController.CreateFavoriteManga)
 		favorites.GET("/get_favorite_manga_by_user_id/:id", favoriteController.GetFavoriteMangaByUserId)
+		favorites.DELETE("/remove_favorite_manga/:id", favoriteController.RemoveFavoriteMangaByUserId)
+	}
+
+	chapters := r.Group("/chapters")
+	{
+		chapters.POST("/create_chapter", chapterController.CreateChapter)
 	}
 
 	// Cloudinary cover_image upload for manga

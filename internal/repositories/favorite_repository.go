@@ -115,3 +115,36 @@ func (favoriteRepo *FavoriteRepo) GetAllFavoriteMangaByUserId(ctx context.Contex
 
 	return nil, fmt.Errorf("no favorites found for this user")
 }
+
+func (favoriteRepo *FavoriteRepo) RemoveFavoriteMangaByUserId(ctx context.Context, userId string, mangaIds []string) (string, error) {
+	userObjectId, err := bson.ObjectIDFromHex(userId)
+	if err != nil {
+		return "", fmt.Errorf("invalid userId: %v", err)
+	}
+
+	var mangaObjectIds []bson.ObjectID
+	for _, id := range mangaIds {
+		objId, err := bson.ObjectIDFromHex(id)
+		if err != nil {
+			return "", fmt.Errorf("invalid mangaId: %v", err)
+		}
+		mangaObjectIds = append(mangaObjectIds, objId)
+
+	}
+
+	filter := bson.M{
+		"user":  userObjectId,
+		"manga": bson.M{"$in": mangaObjectIds},
+	}
+
+	result, err := favoriteRepo.coll.DeleteMany(ctx, filter)
+	if err != nil {
+		return "", fmt.Errorf("failed to remove favorites: %v", err)
+	}
+
+	if result.DeletedCount == 0 {
+		return fmt.Sprintf("%d favorites remove unsuccessfully"), nil
+	}
+
+	return fmt.Sprintf("%d favorites removed successfully", result.DeletedCount), nil
+}

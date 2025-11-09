@@ -13,5 +13,6 @@ var ControllerModule = fx.Options(
 		controllers.NewCloudinaryController,
 		controllers.NewMangaController,
 		controllers.NewFavoriteController,
+		controllers.NewChapterController,
 	),
 )

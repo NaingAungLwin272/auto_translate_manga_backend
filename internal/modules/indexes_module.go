@@ -59,5 +59,24 @@ func SetupIndexes(db *mongo.Database) {
 		log.Fatal("Failed to create index for favorites:", err)
 	}
 
+	// chapter collection
+	_, err = db.Collection("chapters").Indexes().CreateMany(context.TODO(), []mongo.IndexModel{
+		{
+			Keys: bson.D{
+				{Key: "manga", Value: 1},
+				{Key: "chapter_number", Value: 1},
+			},
+			Options: options.Index().SetUnique(true).SetName("unique_manga_chapter"),
+		},
+		{
+			Keys:    bson.D{{Key: "manga", Value: 1}},
+			Options: options.Index().SetName("idx_manga_id"),
+		},
+		{
+			Keys:    bson.D{{Key: "updated_at", Value: -1}},
+			Options: options.Index().SetName("idx_updated_at"),
+		},
+	})
+
 	log.Println("✅ All indexes created successfully")
 }

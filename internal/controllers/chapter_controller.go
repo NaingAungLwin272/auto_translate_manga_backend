@@ -1,0 +1,64 @@
+package controllers
+
+import (
+	dtos "auto_translate_manga_backend/internal/dto"
+	"auto_translate_manga_backend/internal/services"
+	"auto_translate_manga_backend/internal/utils"
+	"context"
+	"net/http"
+	"strings"
+
+	"github.com/gin-gonic/gin"
+)
+
+type ChapterController struct {
+	service *services.ChapterService
+}
+
+func NewChapterController(service *services.ChapterService) *ChapterController {
+	return &ChapterController{service: service}
+}
+
+func (chapterController *ChapterController) CreateChapter(ctx *gin.Context) {
+	var dto dtos.CreateChapterDTO
+	if err := ctx.ShouldBindJSON(&dto); err != nil {
+		ctx.JSON(http.StatusBadRequest, utils.ErrorResponse{
+			Status:  http.StatusBadRequest,
+			Error:   http.StatusText(http.StatusBadRequest),
+			Message: "fields are require",
+		})
+		return
+	}
+
+	chapter, err := chapterController.service.CreateChapter(context.Background(), &dto)
+	if err != nil {
+		if strings.Contains(err.Error(), "already exists") {
+			ctx.JSON(http.StatusConflict, utils.ErrorResponse{
+				Status:  http.StatusConflict,
+				Error:   http.StatusText(http.StatusConflict),
+				Message: "chapter already exists",
+			})
+			return
+		}
+
+		ctx.JSON(http.StatusInternalServerError, utils.ErrorResponse{
+			Status:  http.StatusInternalServerError,
+			Error:   http.StatusText(http.StatusInternalServerError),
+			Message: "internal server error",
+		})
+		return
+	}
+
+	chapterResponse := dtos.ChapterResponseDTO{
+		ID:    chapter.ID,
+		Manga: chapter.Manga,
+		Title: chapter.Title,
+		Pages: chapter.Pages,
+	}
+
+	ctx.JSON(http.StatusOK, utils.SuccessResponse[dtos.ChapterResponseDTO]{
+		Status:  http.StatusOK,
+		Message: "chapter created successfully",
+		Data:    chapterResponse,
+	})
+}
