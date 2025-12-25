@@ -22,6 +22,41 @@ func NewChapterRepository(client *mongo.Client, cfg *configs.Config) *ChapterRep
 	}
 }
 
+func chapterPipeline(mangaId string) (mongo.Pipeline, error) {
+	pipeline := mongo.Pipeline{
+		{{Key: "$lookup", Value: bson.D{
+			{Key: "from", Value: "mangas"},
+			{Key: "localField", Value: "manga"},
+			{Key: "foreignField", Value: "_id"},
+			{Key: "as", Value: "manga"},
+		}}},
+
+		{{Key: "$unwind", Value: bson.D{
+			{Key: "path", Value: "$manga"},
+			{Key: "preserveNullAndEmptyArrays", Value: true},
+		}}},
+
+		{{Key: "$lookup", Value: bson.D{
+			{Key: "from", Value: "genres"},
+			{Key: "localField", Value: "manga.genres"},
+			{Key: "foreignField", Value: "_id"},
+			{Key: "as", Value: "manga.genres"},
+		}}},
+	}
+
+	if mangaId != "" {
+		objectID, err := bson.ObjectIDFromHex(mangaId)
+		if err != nil {
+			return nil, fmt.Errorf("invalid manga id format: %v", err)
+		}
+
+		pipeline = append(mongo.Pipeline{{{Key: "$match", Value: bson.D{{Key: "manga", Value: objectID}}}}}, pipeline...)
+
+	}
+
+	return pipeline, nil
+}
+
 func (chapterRepository *ChapterRepository) CreateChapter(ctx context.Context, chapters *models.Chapter) (*models.Chapter, error) {
 	chapters.CreatedAt = time.Now()
 	chapters.UpdatedAt = time.Now()
@@ -41,4 +76,31 @@ func (chapterRepository *ChapterRepository) CreateChapter(ctx context.Context, c
 
 	chapters.ID = oid
 	return chapters, nil
+}
+
+func (chapterRepository *ChapterRepository) GetAllChaptersByMangaID(ctx context.Context, mangaId string) (*[]models.ChapterWithMangaAndGenres, error) {
+	pipeline, err := chapterPipeline(mangaId)
+	if err != nil {
+		return nil, err
+	}
+	cursor, err := chapterRepository.coll.Aggregate(ctx, pipeline)
+	if err != nil {
+		return nil, fmt.Errorf("aggregate failed: %v", err)
+	}
+	defer cursor.Close(ctx)
+
+	var chapters []models.ChapterWithMangaAndGenres
+	if err := cursor.All(ctx, &chapters); err != nil {
+		return nil, err
+	}
+
+	if len(chapters) == 0 {
+		return &[]models.ChapterWithMangaAndGenres{}, nil
+	}
+
+	return &chapters, nil
+}
+
+func (chapterRepository *ChapterRepository) DeleteChapterByID(ctx context.Context, mangaId string) (string, error) {
+	return "", nil
 }

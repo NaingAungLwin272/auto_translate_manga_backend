@@ -30,3 +30,20 @@ func (cloudinaryService *CloudinaryServcie) UploadImage(ctx context.Context, rea
 
 	return resp.SecureURL, nil
 }
+
+func (cloudinarySerrvice *CloudinaryServcie) UploadPagesForChapter(ctx context.Context, reader io.Reader, mangaName string, chapterNumber int, pages int) (string, error) {
+	cld := utils.GetCloudinaryClient()
+
+	folderPath := fmt.Sprintf("%s/%d/pages", mangaName, chapterNumber)
+
+	resp, err := cld.Upload.Upload(ctx, reader, uploader.UploadParams{
+		Folder:   folderPath,
+		PublicID: fmt.Sprintf("page_%d", pages),
+	})
+
+	if err != nil {
+		return "", fmt.Errorf("upload failed: %v", err)
+	}
+
+	return resp.SecureURL, nil
+}

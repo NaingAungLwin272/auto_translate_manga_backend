@@ -22,3 +22,13 @@ type ChapterResponseDTO struct {
 	Pages         []models.ChapterDetail `json:"pages"`
 	CreatedAt     time.Time              `json:"created_at"`
 }
+
+type ChapterResponseDTOWithMangaGenres struct {
+	ID            string                 `json:"id"`
+	Manga         models.MangaWithGenres `json:"manga"`
+	ChapterNumber int64                  `json:"chapter_number"`
+	Title         string                 `json:"title"`
+	Pages         []models.ChapterDetail `json:"pages"`
+	CreatedAt     time.Time              `json:"created_at"`
+	UpdatedAt     time.Time              `json:"updated_at"`
+}

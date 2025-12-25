@@ -59,11 +59,14 @@ func SetupRoutes(
 	chapters := r.Group("/chapters")
 	{
 		chapters.POST("/create_chapter", chapterController.CreateChapter)
+		chapters.GET("/get_chapter_by_manga_id/:manga_id", chapterController.GetAllChaptersByMangaID)
 	}
 
 	// Cloudinary cover_image upload for manga
-	cover_image := r.Group("/file_upload")
+	cloudinary := r.Group("/file_upload")
 	{
-		cover_image.POST("/cover_image_upload", cloudinaryController.UploadCoverImageToCloudinary)
+		cloudinary.POST("/cover_image_upload", cloudinaryController.UploadCoverImageToCloudinary)
+		cloudinary.POST("/pages_upload", cloudinaryController.UploadChapterPages)
 	}
+
 }

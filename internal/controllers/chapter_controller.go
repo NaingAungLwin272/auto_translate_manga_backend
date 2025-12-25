@@ -50,15 +50,66 @@ func (chapterController *ChapterController) CreateChapter(ctx *gin.Context) {
 	}
 
 	chapterResponse := dtos.ChapterResponseDTO{
-		ID:    chapter.ID,
-		Manga: chapter.Manga,
-		Title: chapter.Title,
-		Pages: chapter.Pages,
+		ID:            chapter.ID,
+		Manga:         chapter.Manga,
+		Title:         chapter.Title,
+		ChapterNumber: chapter.ChapterNumber,
+		Pages:         chapter.Pages,
+		CreatedAt:     chapter.CreatedAt,
 	}
 
 	ctx.JSON(http.StatusOK, utils.SuccessResponse[dtos.ChapterResponseDTO]{
 		Status:  http.StatusOK,
 		Message: "chapter created successfully",
+		Data:    chapterResponse,
+	})
+}
+
+func (chapterController *ChapterController) GetAllChaptersByMangaID(ctx *gin.Context) {
+	id := ctx.Params.ByName("manga_id")
+	manga, err := chapterController.service.GetAllChaptersByMangaID(ctx, id)
+	if err != nil {
+		if err.Error() == "manga not found" {
+			ctx.JSON(http.StatusNotFound, utils.ErrorResponse{
+				Status:  http.StatusNotFound,
+				Error:   http.StatusText(http.StatusNotFound),
+				Message: "manga not found",
+			})
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, utils.ErrorResponse{
+			Status:  http.StatusInternalServerError,
+			Error:   http.StatusText(http.StatusInternalServerError),
+			Message: err.Error(),
+		})
+		return
+	}
+
+	var chapterResponse []dtos.ChapterResponseDTOWithMangaGenres
+	for _, result := range *manga {
+		chapterResponse = append(chapterResponse, dtos.ChapterResponseDTOWithMangaGenres{
+			ID:            result.ID.Hex(),
+			Manga:         result.Manga,
+			ChapterNumber: result.ChapterNumber,
+			Title:         result.Title,
+			Pages:         result.Pages,
+			CreatedAt:     result.CreatedAt,
+			UpdatedAt:     result.UpdatedAt,
+		})
+	}
+
+	if len(chapterResponse) == 0 {
+		ctx.JSON(http.StatusOK, utils.SuccessResponse[[]dtos.ChapterResponseDTOWithMangaGenres]{
+			Status:  http.StatusOK,
+			Message: "no chapter found",
+			Data:    []dtos.ChapterResponseDTOWithMangaGenres{},
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, utils.SuccessResponse[[]dtos.ChapterResponseDTOWithMangaGenres]{
+		Status:  http.StatusOK,
+		Message: "chapter found successfully",
 		Data:    chapterResponse,
 	})
 }
