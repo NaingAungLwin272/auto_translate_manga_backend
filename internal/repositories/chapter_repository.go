@@ -104,8 +104,8 @@ func (chapterRespository *ChapterRepository) GetChapterByID(ctx context.Context,
 
 	var chapter models.ChapterWithMangaAndGenres
 	if cursor.Next(ctx) {
-		if err := cursor.Decode(&chapter); err != nil {\
-			fmt.Println("this is")
+		if err := cursor.Decode(&chapter); err != nil {
+			// fmt.Println("this is testing....")
 			return nil, fmt.Errorf("failed to decode chapter: %v", err)
 		}
 		return &chapter, nil
