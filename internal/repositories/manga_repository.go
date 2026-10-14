@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"auto_translate_manga_backend/internal/configs"
+	dtos "auto_translate_manga_backend/internal/dto"
 	"auto_translate_manga_backend/internal/models"
 	"context"
 	"encoding/json"
@@ -11,6 +12,7 @@ import (
 
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
 type MangaRepo struct {
@@ -188,3 +190,51 @@ func (mangaRepo *MangaRepo) DeleteManga(ctx context.Context, id string) (string,
 
 	return "manga deleted successfully", nil
 }
+
+func (mangaRepo *MangaRepo) UpdateMangaById(ctx context.Context, id string, manga *dtos.UpdateMangaDTO) (*models.Manga, error) {
+	objectID, err := bson.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, fmt.Errorf("invalid id: %s", id)
+	}
+
+	// Marshal the DTO to BSON. Nil fields are automatically omitted thanks to omitempty tags
+	data, err := bson.Marshal(manga)
+	if err != nil {
+		return nil, err
+	}
+
+	// Unmarshal BSON bytes into a bson.M map
+	var updateField bson.M
+	if err := bson.Unmarshal(data, &updateField); err != nil {
+		return nil, err
+	}
+
+	if len(updateField) == 0 {
+		return nil, fmt.Errorf("no fields to update")
+	}
+
+	updateField["updated_at"] = time.Now()
+
+	update := bson.M{"$set": updateField}
+
+	var updatedManga models.Manga
+	err = mangaRepo.coll.FindOneAndUpdate(
+		ctx,
+		bson.M{"_id": objectID},
+		update,
+		options.FindOneAndUpdate().SetReturnDocument(options.After),
+	).Decode(&updatedManga)
+
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, fmt.Errorf("manga not found")
+		}
+		if mongo.IsDuplicateKeyError(err) && manga.Title != nil {
+			return nil, fmt.Errorf("title '%s' already exists", *manga.Title)
+		}
+		return nil, err
+	}
+
+	return &updatedManga, nil
+}
+

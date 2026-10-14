@@ -22,7 +22,7 @@ func NewChapterRepository(client *mongo.Client, cfg *configs.Config) *ChapterRep
 	}
 }
 
-func chapterPipeline(mangaId string) (mongo.Pipeline, error) {
+func chapterPipeline(mangaId string, chapterId string) (mongo.Pipeline, error) {
 	pipeline := mongo.Pipeline{
 		{{Key: "$lookup", Value: bson.D{
 			{Key: "from", Value: "mangas"},
@@ -54,6 +54,14 @@ func chapterPipeline(mangaId string) (mongo.Pipeline, error) {
 
 	}
 
+	if chapterId != "" {
+		objectID, err := bson.ObjectIDFromHex(chapterId)
+		if err != nil {
+			return nil, fmt.Errorf("invalid chapter id format: %v", err)
+		}
+		pipeline = append(mongo.Pipeline{{{Key: "$match", Value: bson.D{{Key: "_id", Value: objectID}}}}}, pipeline...)
+	}
+
 	return pipeline, nil
 }
 
@@ -78,8 +86,36 @@ func (chapterRepository *ChapterRepository) CreateChapter(ctx context.Context, c
 	return chapters, nil
 }
 
+func (chapterRespository *ChapterRepository) GetChapterByID(ctx context.Context, id string) (*models.ChapterWithMangaAndGenres, error) {
+	objectID, err := bson.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, fmt.Errorf("invalid chapter id format: %v", err)
+	}
+
+	pipeline, err := chapterPipeline("", objectID.Hex())
+	if err != nil {
+		return nil, err
+	}
+	cursor, err := chapterRespository.coll.Aggregate(ctx, pipeline)
+	if err != nil {
+		return nil, fmt.Errorf("aggregate failed: %v", err)
+	}
+	defer cursor.Close(ctx)
+
+	var chapter models.ChapterWithMangaAndGenres
+	if cursor.Next(ctx) {
+		if err := cursor.Decode(&chapter); err != nil {\
+			fmt.Println("this is")
+			return nil, fmt.Errorf("failed to decode chapter: %v", err)
+		}
+		return &chapter, nil
+	}
+
+	return nil, fmt.Errorf("chapter not found")
+}
+
 func (chapterRepository *ChapterRepository) GetAllChaptersByMangaID(ctx context.Context, mangaId string) (*[]models.ChapterWithMangaAndGenres, error) {
-	pipeline, err := chapterPipeline(mangaId)
+	pipeline, err := chapterPipeline(mangaId, "")
 	if err != nil {
 		return nil, err
 	}

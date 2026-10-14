@@ -14,6 +14,7 @@ func SetupRoutes(
 	mangaController *controllers.MangaController,
 	favoriteController *controllers.FavoriteController,
 	chapterController *controllers.ChapterController,
+	downloadController *controllers.DownloadController,
 	cloudinaryController *controllers.CloudinaryController,
 ) {
 	// Global middlewares
@@ -60,6 +61,12 @@ func SetupRoutes(
 	{
 		chapters.POST("/create_chapter", chapterController.CreateChapter)
 		chapters.GET("/get_chapter_by_manga_id/:manga_id", chapterController.GetAllChaptersByMangaID)
+		chapters.GET("/get_chapter_by_id/:chapter_id", chapterController.GetChapterByID)
+	}
+
+	downloads := r.Group("/downloads")
+	{
+		downloads.POST("/create_download_by_chapter", downloadController.CreateDownloadManga)
 	}
 
 	// Cloudinary cover_image upload for manga

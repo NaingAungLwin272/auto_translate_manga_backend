@@ -14,10 +14,11 @@ func NewRouter(
 	mangaController *controllers.MangaController,
 	favoriteController *controllers.FavoriteController,
 	chapterController *controllers.ChapterController,
+	downloadController *controllers.DownloadController,
 	cloudinaryController *controllers.CloudinaryController,
 ) *gin.Engine {
 	r := gin.Default()
-	routes.SetupRoutes(r, userController, genreController, mangaController, favoriteController, chapterController, cloudinaryController)
+	routes.SetupRoutes(r, userController, genreController, mangaController, favoriteController, chapterController, downloadController, cloudinaryController)
 	return r
 }
 

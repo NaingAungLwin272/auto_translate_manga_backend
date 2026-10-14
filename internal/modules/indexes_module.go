@@ -77,6 +77,21 @@ func SetupIndexes(db *mongo.Database) {
 			Options: options.Index().SetName("idx_updated_at"),
 		},
 	})
+	if err != nil {
+		log.Fatal("Failed to create index for chapters:", err)
+	}
+
+	// download collection
+	_, err = db.Collection("downloads").Indexes().CreateOne(context.TODO(), mongo.IndexModel{
+		Keys: bson.D{
+			{Key: "chapters", Value: 1},
+		},
+		Options: options.Index().
+			SetUnique(true),
+	})
+	if err != nil {
+		log.Fatal("Failed to create index for downloads:", err)
+	}
 
 	log.Println("✅ All indexes created successfully")
 }

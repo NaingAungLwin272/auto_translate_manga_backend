@@ -16,6 +16,16 @@ type CreateMangaDTO struct {
 	Status      string          `json:"status" binding:"required"` // "ongoing" or "completed"
 }
 
+type UpdateMangaDTO struct {
+	Title       *string          `json:"title" bson:"title,omitempty"`
+	Description *string          `json:"description" bson:"description,omitempty"`
+	Author      *string          `json:"author" bson:"author,omitempty"`
+	CoverImage  *string          `json:"cover_image" bson:"cover_image,omitempty"`
+	Genres      []bson.ObjectID  `json:"genres" bson:"genres,omitempty"`
+	Status      *string          `json:"status" bson:"status,omitempty"`
+}
+
+
 type MangaResponseDTO struct {
 	ID          string          `json:"id"`
 	Title       string          `json:"title"`

@@ -25,6 +25,10 @@ func (chapterService *ChapterService) CreateChapter(ctx context.Context, chapter
 	return chapterService.repo.CreateChapter(ctx, chapterResponse)
 }
 
+func (chapterService *ChapterService) GetChapterByID(ctx context.Context, chapterId string) (*models.ChapterWithMangaAndGenres, error) {
+	return chapterService.repo.GetChapterByID(ctx, chapterId)
+}
+
 func (chapterService *ChapterService) GetAllChaptersByMangaID(ctx context.Context, mangaId string) (*[]models.ChapterWithMangaAndGenres, error) {
 	return chapterService.repo.GetAllChaptersByMangaID(ctx, mangaId)
 }

@@ -65,6 +65,42 @@ func (chapterController *ChapterController) CreateChapter(ctx *gin.Context) {
 	})
 }
 
+func (chapterController *ChapterController) GetChapterByID(ctx *gin.Context) {
+	id := ctx.Params.ByName("chapter_id")
+	chapter, err := chapterController.service.GetChapterByID(ctx, id)
+	if err != nil {
+		if err.Error() == "chapter not found" {
+			ctx.JSON(http.StatusNotFound, utils.ErrorResponse{
+				Status:  http.StatusNotFound,
+				Error:   http.StatusText(http.StatusNotFound),
+				Message: "chapter not found",
+			})
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, utils.ErrorResponse{
+			Status:  http.StatusInternalServerError,
+			Error:   http.StatusText(http.StatusInternalServerError),
+			Message: err.Error(),
+		})
+		return
+	}
+	chapterResponse := dtos.ChapterResponseDTOWithMangaGenres{
+		ID:            chapter.ID.Hex(),
+		Manga:         chapter.Manga,
+		Title:         chapter.Title,
+		ChapterNumber: chapter.ChapterNumber,
+		Pages:         chapter.Pages,
+		CreatedAt:     chapter.CreatedAt,
+		UpdatedAt:     chapter.UpdatedAt,
+	}
+
+	ctx.JSON(http.StatusOK, utils.SuccessResponse[dtos.ChapterResponseDTOWithMangaGenres]{
+		Status:  http.StatusOK,
+		Message: "chapter found successfully",
+		Data:    chapterResponse,
+	})
+}
+
 func (chapterController *ChapterController) GetAllChaptersByMangaID(ctx *gin.Context) {
 	id := ctx.Params.ByName("manga_id")
 	manga, err := chapterController.service.GetAllChaptersByMangaID(ctx, id)
